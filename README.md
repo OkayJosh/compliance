@@ -30,8 +30,8 @@ Before you begin, ensure you have the following installed on your machine:
 1. **Clone the repository:**
 
    ```bash
-   git clone <repository-url>
-   cd <repository-directory>
+   git clone https://github.com/OkayJosh/compliance
+   cd compliance
    
 2. **Create and activate a virtual environment:**
 
