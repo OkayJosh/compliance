@@ -1,7 +1,6 @@
 """
 API call for the infrastructures
 """
-import base64
 import hashlib
 import hmac
 import json
@@ -54,7 +53,44 @@ class SumsubAPIAdapter(SumsubAPIPort):
 
     def _get_headers(self, request: requests.Request) -> requests.PreparedRequest:
         """
-        Constructs headers, including token, timestamp, and HMAC signature.
+        Constructs the necessary headers for authenticating requests to the SUMSUB API.
+
+        This private method generates and appends the required headers to the HTTP request.
+        It includes an HMAC signature, which is calculated using the API's secret key, and
+        adds the current timestamp to the request for security purposes.
+
+        Args:
+            request (requests.Request): The original HTTP request that will be signed
+                                        with the necessary headers.
+
+        Returns:
+            requests.PreparedRequest: The signed and prepared request, with headers
+                                      that include:
+                                      - 'X-App-Token': Your SUMSUB app token.
+                                      - 'X-App-Access-Ts': The current timestamp in seconds.
+                                      - 'X-App-Access-Sig': The HMAC signature for the request.
+
+        Raises:
+            ValueError: If the request body is not in the correct format or encoding.
+
+        Example:
+            >>> request = requests.Request('POST', url, data=payload)
+            >>> signed_request = self._get_headers(request)
+            >>> response = requests.Session().send(signed_request)
+
+        HMAC Signature Generation:
+            The HMAC signature is created using the following data:
+            - Timestamp (in seconds)
+            - HTTP method (e.g., 'POST', 'GET')
+            - The request path URL
+            - The request body (if present)
+
+            The signature is computed using the SHA-256 hashing algorithm.
+
+        Notes:
+            - This method is called internally to ensure that all API requests comply
+              with SUMSUB's security requirements.
+            - The HMAC signature protects the integrity and authenticity of each API request.
         """
         prepared_request = request.prepare()
         now = int(time.time())
@@ -157,7 +193,6 @@ class SumsubAPIAdapter(SumsubAPIPort):
         # Prepare the files for the POST request
         files = {
             'content': ('document_file', binary_content, document.document_file.content_type)
-            # Use the content type from the file
         }
 
         # Prepare the metadata payload

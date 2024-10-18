@@ -2,7 +2,6 @@ from django.forms import model_to_dict
 
 from application.ports import ApplicantRepositoryPort, SumsubAPIPort
 from domain.models import Applicant, Document
-from sumsub.models import ApplicantModel
 
 
 class SumsubApplicant:
@@ -65,6 +64,8 @@ class SumsubApplicant:
 
     def add_document(self, document_dto):
         """
+        NOTE:: Instead of having another class called: SumsubDocument, I refactor to have a single class here with the
+        add_document method.
         Adds a document for an existing applicant using the provided document data transfer object (DTO).
 
         This method constructs a Document instance from the given DTO and uploads it to the SUMSUB API.
@@ -91,10 +92,12 @@ class SumsubApplicant:
             applicant_id (str): The unique identifier of the applicant for whom the status is being retrieved.
 
         Returns:
-            str: The verification status of the applicant (e.g., "PENDING", "VERIFIED", "REJECTED").
+            str: The verification status of the applicant (e.g., "INIT", "VERIFIED", "REJECTED").
         """
         status = self.sumsub_api.get_verification_status(applicant_id)
         self.applicant_db = self.applicant_repo.update_applicant(
             applicant_id=applicant_id, verification_status=status
         )
+        # Get and print verification status
+        print("status", status)
         return status
